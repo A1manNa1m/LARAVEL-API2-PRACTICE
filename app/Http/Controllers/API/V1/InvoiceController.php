@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use Illuminate\Http\Request;
+use App\Filter\V1\InvoiceFilter;
 use App\Models\Invoice;
 use App\Http\Requests\V1\StoreInvoiceRequest;
 use App\Http\Requests\V1\UpdateInvoiceRequest;
@@ -15,9 +17,19 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new InvoiceCollection(Invoice::all());
+        $filter = new InvoiceFilter();
+        $filterItems = $filter->transform($request); //[['column','operator','value']]
+        $includePayments = $request->query('includePayments');
+
+        $invoices = Invoice::where($filterItems);
+
+        if($includePayments){
+            $invoices = $invoices->with('payments');
+        }
+
+        return new InvoiceCollection($invoices->paginate()->appends($request->query()));
     }
 
     /**
@@ -41,6 +53,12 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
+        $includePayments = request()->query('includePayments');
+
+        if($includePayments){
+            return new InvoiceResource($invoice->loadMissing('payments'));
+        }
+
         return new InvoiceResource($invoice);
     }
 

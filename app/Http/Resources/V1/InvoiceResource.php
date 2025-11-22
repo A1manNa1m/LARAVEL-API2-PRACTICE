@@ -21,6 +21,7 @@ class InvoiceResource extends JsonResource
             'status' => $this->status,
             'billed_date' => $this->billed_date,
             'paid_date' => $this->paid_date,
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
     }
 }
