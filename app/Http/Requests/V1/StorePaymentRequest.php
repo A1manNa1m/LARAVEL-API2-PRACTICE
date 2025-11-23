@@ -22,7 +22,11 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'customer_id' => 'required|exists:customers,id',
+            'invoice_id' => 'required|exists:invoices,id',
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|in:CC,DC,FPX',
+            'payment_date' => 'required|date|date_format:d-m-Y',
         ];
     }
 }
