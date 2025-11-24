@@ -11,7 +11,7 @@ class StoreInvoiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,8 +25,8 @@ class StoreInvoiceRequest extends FormRequest
             'customer_id' => 'required|exists:customers,id',
             'amount' => 'required|numeric|min:0',
             'status' => 'required|string|in:B,FP,HP,OP,V,b,fp,hp,op,v',
-            'billed_date' => 'required|date|date_format:d-m-Y',
-            'paid_date' => 'nullable|date|after_or_equal:billed_date|date_format:d-m-Y',
+            'billed_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'paid_date' => 'nullable|date|after_or_equal:billed_date|date_format:Y-m-d H:i:s',
         ];
     }
 }

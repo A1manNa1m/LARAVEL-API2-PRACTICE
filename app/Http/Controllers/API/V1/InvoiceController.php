@@ -45,7 +45,12 @@ class InvoiceController extends Controller
      */
     public function store(StoreInvoiceRequest $request)
     {
-        //
+        $data = $request->validated();
+        $invoice = Invoice::create($data);
+
+        return (new InvoiceResource($invoice))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
