@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Models\Payment;
+use App\Models\Invoice;
 use App\Http\Requests\V1\StorePaymentRequest;
 use App\Http\Requests\V1\UpdatePaymentRequest;
 use App\Http\Controllers\Controller;
@@ -32,7 +33,34 @@ class PaymentController extends Controller
      */
     public function store(StorePaymentRequest $request)
     {
-        //
+        $data = $request->validated();
+        $invoice = Invoice::findOrFail($data['invoice_id']);
+        
+        $totalPaid = $invoice->payments()->sum('amount');
+        $newTotalPaid = $totalPaid + $data['amount'];
+
+        // Update invoice status based on payment amount
+        if ($newTotalPaid == $invoice->amount) {
+            $invoice->status = 'FP'; // Full Paid
+            $invoice->paid_date = now();
+        } elseif ($newTotalPaid > $invoice->amount) {
+            $invoice->status = 'OP'; // Over Paid
+            $invoice->paid_date = now();
+            return response()->json([
+                'message' => 'Payment exceeds the total invoice amount.'
+            ]);
+        } elseif ($newTotalPaid > 0) {
+            $invoice->status = 'HP'; // Half Paid
+            $invoice->paid_date = null;
+        } else {
+            $invoice->status = 'B'; // Still billed
+            $invoice->paid_date = null;
+        }
+
+        $invoice->save();
+
+        $payment = Payment::create($data);
+        return new PaymentResource($payment);
     }
 
     /**
