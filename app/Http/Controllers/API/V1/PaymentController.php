@@ -46,9 +46,6 @@ class PaymentController extends Controller
         } elseif ($newTotalPaid > $invoice->amount) {
             $invoice->status = 'OP'; // Over Paid
             $invoice->paid_date = now();
-            return response()->json([
-                'message' => 'Payment exceeds the total invoice amount.'
-            ]);
         } elseif ($newTotalPaid > 0) {
             $invoice->status = 'HP'; // Half Paid
             $invoice->paid_date = null;
