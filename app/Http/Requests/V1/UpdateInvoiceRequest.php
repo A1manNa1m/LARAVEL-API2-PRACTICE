@@ -11,7 +11,7 @@ class UpdateInvoiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,23 @@ class UpdateInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
-        ];
+        $method = $this->method();
+        if ($method == 'PUT') {
+            return [
+                'customer_id' => 'required|exists:customers,id',
+                'amount' => 'required|numeric|min:1',
+                'status' => 'required|string|in:B,HP,FP,OP,V,b,hp,fp,op,v',
+                'billed_date' => 'required|date format:Y-m-d H:i:s',
+                'paid_date' => 'nullable|date format:Y-m-d H:i:s',
+            ];
+        } else{
+            return [
+                'customer_id' => 'sometimes|required|exists:customers,id',
+                'amount' => 'sometimes|required|numeric|min:1',
+                'status' => 'sometimes|required|string|in:B,HP,FP,OP,V,b,hp,fp,op,v',
+                'billed_date' => 'sometimes|required|date format:Y-m-d H:i:s',
+                'paid_date' => 'sometimes|nullable|date format:Y-m-d H:i:s',
+            ];
+        }
     }
 }
