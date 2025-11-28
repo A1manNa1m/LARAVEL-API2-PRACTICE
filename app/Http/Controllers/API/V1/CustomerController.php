@@ -75,7 +75,10 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        //
+        $customer->update($request->all());
+        return response()->json([
+                'message' => 'Customer updated successfully', 
+                'data' => new CustomerResource($customer)], 200);
     }
 
     /**

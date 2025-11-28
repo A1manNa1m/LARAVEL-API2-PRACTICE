@@ -80,7 +80,10 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        //
+        $invoice->update($request->validated());
+        return response()->json([
+                'message' => 'Invoice updated successfully', 
+                'data' => new InvoiceResource($invoice)], 200);
     }
 
     /**
