@@ -122,6 +122,30 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        //
+        $invoice = Invoice::findOrFail($payment->invoice_id);
+
+        $totalPaid = $invoice->payments()->sum('amount');
+        $newTotal =  $totalPaid - $payment->amount;
+
+        // Update invoice status based on payment amount
+        if ($newTotal == $invoice->amount) {
+            $invoice->status = 'FP'; // Full Paid
+            $invoice->paid_date = now();
+        } elseif ($newTotal > $invoice->amount) {
+            $invoice->status = 'OP'; // Over Paid
+            $invoice->paid_date = now();
+        } elseif ($newTotal > 0) {
+            $invoice->status = 'HP'; // Half Paid
+            $invoice->paid_date = null;
+        } else {
+            $invoice->status = 'B'; // Still billed
+            $invoice->paid_date = null;
+        }
+
+        $invoice->save();
+        
+        $payment->delete();
+        return response()->json([
+            'message' => 'Payment deleted successfully'], 200);
     }
 }

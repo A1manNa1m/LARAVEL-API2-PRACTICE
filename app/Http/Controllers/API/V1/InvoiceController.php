@@ -91,6 +91,8 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $invoice->delete();
+        return response()->json([
+            'message' => 'Invoice deleted successfully'], 200);
     }
 }
