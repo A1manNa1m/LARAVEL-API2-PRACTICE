@@ -88,11 +88,10 @@ class PaymentController extends Controller
         $invoice = Invoice::findOrFail($invoiceId);
 
         // Use amount from request OR fallback to current amount
-        $newAmount = $validated['amount'] ?? $payment->amount;
+        //$newAmount = $validated['amount'] ?? $payment->amount;
 
         // Adjust totals
-        $totalPaid = $invoice->payments()->sum('amount') - $payment->amount;
-        $newTotal = $totalPaid + $newAmount;
+        $newTotal = $invoice->payments()->sum('amount'); + $payment->amount;
 
         // Update invoice status
         if ($newTotal == $invoice->amount) {

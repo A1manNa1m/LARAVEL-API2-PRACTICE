@@ -81,6 +81,26 @@ class InvoiceController extends Controller
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
         $invoice->update($request->validated());
+
+        $newTotal = $invoice->payments()->sum('amount');
+
+        // Update invoice status
+        if ($newTotal == $invoice->amount) {
+            $invoice->status = 'FP';
+            $invoice->paid_date = now();
+        } elseif ($newTotal > $invoice->amount) {
+            $invoice->status = 'OP';
+            $invoice->paid_date = now();
+        } elseif ($newTotal > 0) {
+            $invoice->status = 'HP';
+            $invoice->paid_date = null;
+        } else {
+            $invoice->status = 'B';
+            $invoice->paid_date = null;
+        }
+
+        $invoice->save();
+
         return response()->json([
                 'message' => 'Invoice updated successfully', 
                 'data' => new InvoiceResource($invoice)], 200);
