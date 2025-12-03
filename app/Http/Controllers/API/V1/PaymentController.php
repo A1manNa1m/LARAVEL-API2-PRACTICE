@@ -87,11 +87,9 @@ class PaymentController extends Controller
         $invoiceId = $validated['invoice_id'] ?? $payment->invoice_id;
         $invoice = Invoice::findOrFail($invoiceId);
 
-        // Use amount from request OR fallback to current amount
-        //$newAmount = $validated['amount'] ?? $payment->amount;
-
         // Adjust totals
-        $newTotal = $invoice->payments()->sum('amount'); + $payment->amount;
+        $sum = $invoice->payments()->sum('amount');
+        $newTotal = $sum - $payment->amount + $validatedData['amount'];
 
         // Update invoice status
         if ($newTotal == $invoice->amount) {
@@ -113,7 +111,8 @@ class PaymentController extends Controller
         $payment->update($validatedData);
         return response()->json([
                 'message' => 'Payment updated successfully', 
-                'data' => new PaymentResource($payment)], 200);
+                'data' => new PaymentResource($payment->fresh())
+            ], 200);
     }
 
     /**
